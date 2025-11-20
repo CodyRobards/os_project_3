@@ -12,25 +12,62 @@ typedef struct{
 
 }memory;
 memory* memory_init(int n){
-   // TO-DO
+   memory* m = (memory*)malloc(sizeof(memory));
+   m->pages_num = n;
+   m->curr = 0;
+   m->faults = 0;
+
+   for(int i = 0; i < MAXLEN; i++){
+        m->pages[i] = -1;
+        m->used[i] = 0;
+   }
+
+   return m;
 }
 
 int search_process(memory* m, int process);
 void add_process(memory* m, int process);
-void display_pages(memory* m);
+void display_pages(memory* m, int process, int fault);
 int memory_FIFO(int num);
 
 int search_process(memory* m, int process){
-    // TO-DO
+    for(int i = 0; i < m->pages_num; i++){
+        if(m->used[i] && m->pages[i] == process)
+            return 1;
+    }
+    return 0;
 }
 
 
 void add_process(memory* m, int process){
-   // TO-DO
+   int fault = 0;
+
+   if(!search_process(m, process)){
+        if(m->used[m->curr]){
+            fault = 1;
+            m->faults++;
+        }
+
+        m->pages[m->curr] = process;
+        m->used[m->curr] = 1;
+        m->curr = (m->curr + 1) % m->pages_num;
+   }
+
+   display_pages(m, process, fault);
 }
 
-void display_pages(memory* m){
-   // TO- DO
+void display_pages(memory* m, int process, int fault){
+   printf("%02d", process);
+   if(fault)
+        printf("  F   ");
+   else
+        printf("      ");
+
+   for(int i = 0; i < m->pages_num; i++){
+        if(m->used[i])
+            printf("%02d ", m->pages[i]);
+   }
+   printf("\n");
 }
 
 int memory_FIFO(int num){
